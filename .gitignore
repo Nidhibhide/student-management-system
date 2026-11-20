@@ -1,0 +1,17 @@
+
+# Maven generated files
+target/
+
+# VS Code settings
+.vscode/
+
+# Environment files and secrets
+.env
+.env.*
+
+# Java compiled files
+*.class
+
+# Operating system files
+.DS_Store
+Thumbs.db
