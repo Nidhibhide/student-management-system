@@ -14,10 +14,10 @@ public class Main {
 
         Scanner sc = new Scanner(System.in);
 
-        // Create the service object to access Student operations
+        // Create service object to access student operations
         StudentService studentService = new StudentService();
 
-        // Keep showing the menu until the user chooses Exit
+        // Keep displaying the menu until the user chooses Exit
         while (true) {
 
             System.out.println("\n================================");
@@ -28,45 +28,50 @@ public class Main {
             System.out.println("1. Add Student");
             System.out.println("2. View All Students");
             System.out.println("3. Search Student");
-            System.out.println("4. Exit");
+            System.out.println("4. Update Student");
+            System.out.println("5. Exit");
 
             System.out.print("Enter your choice: ");
 
             String choice = sc.nextLine();
 
-            try {
+            switch (choice) {
 
-                switch (choice) {
+                case "1":
+                    addStudent(sc, studentService);
+                    break;
 
-                    case "1":
-                        addStudent(sc, studentService);
-                        break;
+                case "2":
+                    viewAllStudents(studentService);
+                    break;
 
-                    case "2":
-                        viewAllStudents(studentService);
-                        break;
+                case "3":
+                    searchStudent(sc, studentService);
+                    break;
 
-                    case "3":
-                        searchStudent(sc, studentService);
-                        break;
+                case "4":
+                    updateStudent(sc, studentService);
+                    break;
 
-                    case "4":
-                        System.out.println("\nThank you for using Student Management System!");
-                        sc.close();
-                        return;
+                case "5":
+                    System.out.println(
+                            "\nThank you for using Student Management System!"
+                    );
+                    sc.close();
+                    return;
 
-                    default:
-                        System.out.println("\nInvalid choice! Please select 1, 2, 3, or 4.");
-                }
-
-            } catch (Exception e) {
-                System.out.println("\nError: " + e.getMessage());
+                default:
+                    System.out.println(
+                            "\nInvalid choice! Please select 1, 2, 3, 4, or 5."
+                    );
             }
         }
     }
 
     // ADD STUDENT
-    private static void addStudent(Scanner sc, StudentService studentService) {
+    private static void addStudent(
+            Scanner sc,
+            StudentService studentService) {
 
         try {
 
@@ -99,7 +104,7 @@ public class Main {
             System.out.print("Enter Admission Date (YYYY-MM-DD): ");
             student.setAdmissionDate(Date.valueOf(sc.nextLine()));
 
-            // Call service layer to validate and save the student
+            // Call service to validate and save student
             boolean isAdded = studentService.addStudent(student);
 
             if (isAdded) {
@@ -109,9 +114,14 @@ public class Main {
             }
 
         } catch (IllegalArgumentException e) {
-            System.out.println("\nInvalid input. Please check your details.");
-            System.out.println("Date format must be YYYY-MM-DD (example: 2000-02-02).");
+
+            System.out.println("\nInvalid input: " + e.getMessage());
+            System.out.println(
+                    "Please use the date format YYYY-MM-DD."
+            );
+
         } catch (Exception e) {
+
             System.out.println("\nUnable to add student: " + e.getMessage());
         }
     }
@@ -123,14 +133,16 @@ public class Main {
 
             List<Student> students = studentService.getAllStudents();
 
-            System.out.println("\n==================== STUDENT RECORDS ====================");
+            System.out.println(
+                    "\n==================== STUDENT RECORDS ===================="
+            );
 
             if (students.isEmpty()) {
                 System.out.println("No student records found.");
                 return;
             }
 
-            // Display each student returned by the database
+            // Display every student returned by the database
             for (Student student : students) {
                 displayStudent(student);
             }
@@ -138,21 +150,25 @@ public class Main {
             System.out.println("Total students: " + students.size());
 
         } catch (Exception e) {
-            System.out.println("\nUnable to retrieve students: " + e.getMessage());
+
+            System.out.println(
+                    "\nUnable to retrieve students: " + e.getMessage()
+            );
         }
     }
 
     // SEARCH STUDENT BY ID
-    private static void searchStudent(Scanner sc, StudentService studentService) {
+    private static void searchStudent(
+            Scanner sc,
+            StudentService studentService) {
 
         try {
 
             System.out.print("\nEnter Student ID to search: ");
 
-            // Convert the ID entered as text into an integer
+            // Convert text input into an integer
             int id = Integer.parseInt(sc.nextLine());
 
-            // Ask the service layer to search for this student
             Student student = studentService.searchStudentById(id);
 
             if (student != null) {
@@ -166,18 +182,113 @@ public class Main {
             }
 
         } catch (NumberFormatException e) {
-            System.out.println("\nInvalid ID! Please enter a numeric student ID.");
+
+            System.out.println(
+                    "\nInvalid ID! Please enter a numeric student ID."
+            );
 
         } catch (IllegalArgumentException e) {
+
             System.out.println("\n" + e.getMessage());
 
         } catch (Exception e) {
+
             System.out.println("\nUnable to search student: " + e.getMessage());
         }
     }
 
+    // UPDATE STUDENT
+    private static void updateStudent(
+            Scanner sc,
+            StudentService studentService) {
+
+        try {
+
+            System.out.print("\nEnter Student ID to update: ");
+
+            // Read the ID of the student we want to update
+            int id = Integer.parseInt(sc.nextLine());
+
+            // First check whether this student exists
+            Student student = studentService.searchStudentById(id);
+
+            if (student == null) {
+
+                System.out.println("\nStudent not found with ID: " + id);
+                return;
+            }
+
+            // Show the existing details before asking for changes
+            System.out.println("\nCurrent Student Details:");
+            displayStudent(student);
+
+            System.out.println("\nEnter Updated Student Details:");
+
+            // Ask for the new details
+            System.out.print("Enter First Name: ");
+            student.setFirstName(sc.nextLine());
+
+            System.out.print("Enter Last Name: ");
+            student.setLastName(sc.nextLine());
+
+            System.out.print("Enter Email: ");
+            student.setEmail(sc.nextLine());
+
+            System.out.print("Enter Mobile: ");
+            student.setMobile(sc.nextLine());
+
+            System.out.print("Enter Gender: ");
+            student.setGender(sc.nextLine());
+
+            System.out.print("Enter Date of Birth (YYYY-MM-DD): ");
+            student.setDob(Date.valueOf(sc.nextLine()));
+
+            System.out.print("Enter Address: ");
+            student.setAddress(sc.nextLine());
+
+            System.out.print("Enter Course: ");
+            student.setCourse(sc.nextLine());
+
+            System.out.print("Enter Admission Date (YYYY-MM-DD): ");
+            student.setAdmissionDate(Date.valueOf(sc.nextLine()));
+
+            // Send the updated student object to the service layer
+            boolean isUpdated = studentService.updateStudent(student);
+
+            if (isUpdated) {
+
+                System.out.println("\nStudent updated successfully!");
+
+                // Display the newly updated details
+                System.out.println("\nUpdated Student Details:");
+                displayStudent(student);
+
+            } else {
+
+                System.out.println("\nStudent details could not be updated.");
+            }
+
+        } catch (NumberFormatException e) {
+
+            System.out.println(
+                    "\nInvalid ID! Please enter a numeric student ID."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println("\nInvalid input: " + e.getMessage());
+            System.out.println(
+                    "Please check the entered values and date format (YYYY-MM-DD)."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println("\nUnable to update student: " + e.getMessage());
+        }
+    }
+
     // COMMON METHOD TO DISPLAY STUDENT DETAILS
-    
+    // Used by View All, Search and Update features
     private static void displayStudent(Student student) {
 
         System.out.println("----------------------------------------");

@@ -24,7 +24,7 @@ public class StudentDAOImpl implements StudentDAO {
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            // Set the values for each ? placeholder
+            // Set values for each ? placeholder
             ps.setString(1, student.getFirstName());
             ps.setString(2, student.getLastName());
             ps.setString(3, student.getEmail());
@@ -37,7 +37,7 @@ public class StudentDAOImpl implements StudentDAO {
 
             int rowsInserted = ps.executeUpdate();
 
-            // executeUpdate() returns the number of affected rows
+            // Return true if at least one row was inserted
             return rowsInserted > 0;
         }
     }
@@ -54,12 +54,11 @@ public class StudentDAOImpl implements StudentDAO {
              PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            // next() moves the ResultSet cursor to the next row
+            // Read each row returned by the database
             while (rs.next()) {
 
                 Student student = new Student();
 
-                // Read database columns and store them in the Student object
                 student.setId(rs.getInt("id"));
                 student.setFirstName(rs.getString("first_name"));
                 student.setLastName(rs.getString("last_name"));
@@ -82,18 +81,16 @@ public class StudentDAOImpl implements StudentDAO {
     @Override
     public Student searchStudentById(int id) throws SQLException {
 
-        // Only the student whose ID matches the given ID will be selected
         String sql = "SELECT * FROM students WHERE id = ?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            // Replace the ? placeholder with the ID entered by the user
+            // Pass the student ID into the SQL query
             ps.setInt(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
 
-                // If a matching record exists, read it
                 if (rs.next()) {
 
                     Student student = new Student();
@@ -114,7 +111,47 @@ public class StudentDAOImpl implements StudentDAO {
             }
         }
 
-        // No matching ID was found
         return null;
+    }
+
+    // UPDATE STUDENT
+    @Override
+    public boolean updateStudent(Student student) throws SQLException {
+
+        // SQL query to update all student details for the given ID
+        String sql = "UPDATE students SET " +
+                "first_name = ?, " +
+                "last_name = ?, " +
+                "email = ?, " +
+                "mobile = ?, " +
+                "gender = ?, " +
+                "dob = ?, " +
+                "address = ?, " +
+                "course = ?, " +
+                "admission_date = ? " +
+                "WHERE id = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            // Set the updated student details
+            ps.setString(1, student.getFirstName());
+            ps.setString(2, student.getLastName());
+            ps.setString(3, student.getEmail());
+            ps.setString(4, student.getMobile());
+            ps.setString(5, student.getGender());
+            ps.setDate(6, student.getDob());
+            ps.setString(7, student.getAddress());
+            ps.setString(8, student.getCourse());
+            ps.setDate(9, student.getAdmissionDate());
+
+            // The last placeholder is the ID of the student to update
+            ps.setInt(10, student.getId());
+
+            // executeUpdate() returns the number of affected rows
+            int rowsUpdated = ps.executeUpdate();
+
+            return rowsUpdated > 0;
+        }
     }
 }
