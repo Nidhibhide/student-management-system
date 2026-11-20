@@ -1,17 +1,22 @@
-
-# Maven generated files
+# Maven
 target/
+student-app/target/
 
-# VS Code settings
+# VS Code
 .vscode/
 
-# Environment files and secrets
+# Environment secrets (keep .env.example)
 .env
+**/.env
 .env.*
+**/.env.*
+!.env.example
+!**/.env.example
 
-# Java compiled files
+# Compiled Java
 *.class
+out/
 
-# Operating system files
+# OS files
 .DS_Store
 Thumbs.db
