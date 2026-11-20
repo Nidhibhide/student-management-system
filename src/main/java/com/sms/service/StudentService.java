@@ -8,16 +8,12 @@ import com.sms.model.Student;
 import java.sql.SQLException;
 import java.util.List;
 
+// Service layer contains validation and business logic.
 public class StudentService {
 
-    // DAO object connects the service layer to the database layer
-    private final StudentDAO studentDAO;
+    private final StudentDAO studentDAO = new StudentDAOImpl();
 
-    public StudentService() {
-        this.studentDAO = new StudentDAOImpl();
-    }
-
-    // ADD STUDENT
+    // Add a student after validating the details
     public boolean addStudent(Student student) throws SQLException {
 
         validateStudent(student);
@@ -25,68 +21,67 @@ public class StudentService {
         return studentDAO.addStudent(student);
     }
 
-    // VIEW ALL STUDENTS
+    // Get all students
     public List<Student> getAllStudents() throws SQLException {
 
         return studentDAO.getAllStudents();
     }
 
-    // SEARCH STUDENT BY ID
+    // Search student by ID
     public Student searchStudentById(int id) throws SQLException {
 
         if (id <= 0) {
-            throw new IllegalArgumentException(
-                    "Student ID must be greater than zero."
-            );
+            throw new IllegalArgumentException("Student ID must be greater than zero.");
         }
 
         return studentDAO.searchStudentById(id);
     }
 
-    // UPDATE STUDENT
+    // Update student details
     public boolean updateStudent(Student student) throws SQLException {
 
-        // Validate the ID before updating
         if (student.getId() <= 0) {
-            throw new IllegalArgumentException(
-                    "Invalid student ID."
-            );
+            throw new IllegalArgumentException("Invalid student ID.");
         }
 
-        // Validate the updated student details
         validateStudent(student);
 
-        // Send the updated information to the DAO
         return studentDAO.updateStudent(student);
     }
 
-    // COMMON VALIDATION METHOD
-    // Reuse the same validation rules for Add and Update
+    // Delete student by ID
+    public boolean deleteStudent(int id) throws SQLException {
+
+        if (id <= 0) {
+            throw new IllegalArgumentException("Student ID must be greater than zero.");
+        }
+
+        return studentDAO.deleteStudent(id);
+    }
+
+    // Common validation method used by Add and Update
     private void validateStudent(Student student) {
 
-        if (student.getFirstName() == null ||
-                student.getFirstName().trim().isEmpty()) {
+        if (student == null) {
+            throw new IllegalArgumentException("Student details cannot be empty.");
+        }
 
-            throw new IllegalArgumentException(
-                    "First name is required."
-            );
+        if (student.getFirstName() == null ||
+                student.getFirstName().isBlank()) {
+
+            throw new IllegalArgumentException("First name is required.");
         }
 
         if (student.getEmail() == null ||
-                !student.getEmail().matches(
-                        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+                !student.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
 
-            throw new IllegalArgumentException(
-                    "Please enter a valid email."
-            );
+            throw new IllegalArgumentException("Please enter a valid email address.");
         }
 
         if (student.getCourse() == null ||
-                student.getCourse().trim().isEmpty()) {
+                student.getCourse().isBlank()) {
 
-            throw new IllegalArgumentException(
-                    "Course is required."
-            );
+            throw new IllegalArgumentException("Course is required.");
         }
     }
 }

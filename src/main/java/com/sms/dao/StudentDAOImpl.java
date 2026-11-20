@@ -11,9 +11,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+// This class contains the actual SQL queries for Student operations.
 public class StudentDAOImpl implements StudentDAO {
 
-    // ADD STUDENT
+    // Add a new student to the database
     @Override
     public boolean addStudent(Student student) throws SQLException {
 
@@ -21,10 +22,9 @@ public class StudentDAOImpl implements StudentDAO {
                 "(first_name, last_name, email, mobile, gender, dob, address, course, admission_date) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // Set values for each ? placeholder
             ps.setString(1, student.getFirstName());
             ps.setString(2, student.getLastName());
             ps.setString(3, student.getEmail());
@@ -35,14 +35,11 @@ public class StudentDAOImpl implements StudentDAO {
             ps.setString(8, student.getCourse());
             ps.setDate(9, student.getAdmissionDate());
 
-            int rowsInserted = ps.executeUpdate();
-
-            // Return true if at least one row was inserted
-            return rowsInserted > 0;
+            return ps.executeUpdate() > 0;
         }
     }
 
-    // VIEW ALL STUDENTS
+    // Retrieve all students from the database
     @Override
     public List<Student> getAllStudents() throws SQLException {
 
@@ -50,26 +47,13 @@ public class StudentDAOImpl implements StudentDAO {
 
         String sql = "SELECT * FROM students";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql);
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            // Read each row returned by the database
             while (rs.next()) {
 
-                Student student = new Student();
-
-                student.setId(rs.getInt("id"));
-                student.setFirstName(rs.getString("first_name"));
-                student.setLastName(rs.getString("last_name"));
-                student.setEmail(rs.getString("email"));
-                student.setMobile(rs.getString("mobile"));
-                student.setGender(rs.getString("gender"));
-                student.setDob(rs.getDate("dob"));
-                student.setAddress(rs.getString("address"));
-                student.setCourse(rs.getString("course"));
-                student.setAdmissionDate(rs.getDate("admission_date"));
-
+                Student student = mapResultSetToStudent(rs);
                 students.add(student);
             }
         }
@@ -77,48 +61,33 @@ public class StudentDAOImpl implements StudentDAO {
         return students;
     }
 
-    // SEARCH STUDENT BY ID
+    // Search for a student using their ID
     @Override
     public Student searchStudentById(int id) throws SQLException {
 
         String sql = "SELECT * FROM students WHERE id = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // Pass the student ID into the SQL query
             ps.setInt(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
 
                 if (rs.next()) {
-
-                    Student student = new Student();
-
-                    student.setId(rs.getInt("id"));
-                    student.setFirstName(rs.getString("first_name"));
-                    student.setLastName(rs.getString("last_name"));
-                    student.setEmail(rs.getString("email"));
-                    student.setMobile(rs.getString("mobile"));
-                    student.setGender(rs.getString("gender"));
-                    student.setDob(rs.getDate("dob"));
-                    student.setAddress(rs.getString("address"));
-                    student.setCourse(rs.getString("course"));
-                    student.setAdmissionDate(rs.getDate("admission_date"));
-
-                    return student;
+                    return mapResultSetToStudent(rs);
                 }
             }
         }
 
+        // Return null if no student is found
         return null;
     }
 
-    // UPDATE STUDENT
+    // Update an existing student's details
     @Override
     public boolean updateStudent(Student student) throws SQLException {
 
-        // SQL query to update all student details for the given ID
         String sql = "UPDATE students SET " +
                 "first_name = ?, " +
                 "last_name = ?, " +
@@ -131,10 +100,9 @@ public class StudentDAOImpl implements StudentDAO {
                 "admission_date = ? " +
                 "WHERE id = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // Set the updated student details
             ps.setString(1, student.getFirstName());
             ps.setString(2, student.getLastName());
             ps.setString(3, student.getEmail());
@@ -144,14 +112,45 @@ public class StudentDAOImpl implements StudentDAO {
             ps.setString(7, student.getAddress());
             ps.setString(8, student.getCourse());
             ps.setDate(9, student.getAdmissionDate());
-
-            // The last placeholder is the ID of the student to update
             ps.setInt(10, student.getId());
 
-            // executeUpdate() returns the number of affected rows
-            int rowsUpdated = ps.executeUpdate();
-
-            return rowsUpdated > 0;
+            return ps.executeUpdate() > 0;
         }
+    }
+
+    // Delete a student using their ID
+    @Override
+    public boolean deleteStudent(int id) throws SQLException {
+
+        String sql = "DELETE FROM students WHERE id = ?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            // Pass the student ID to the SQL query
+            ps.setInt(1, id);
+
+            // Returns true if at least one record was deleted
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // Convert a database row into a Student object
+    private Student mapResultSetToStudent(ResultSet rs) throws SQLException {
+
+        Student student = new Student();
+
+        student.setId(rs.getInt("id"));
+        student.setFirstName(rs.getString("first_name"));
+        student.setLastName(rs.getString("last_name"));
+        student.setEmail(rs.getString("email"));
+        student.setMobile(rs.getString("mobile"));
+        student.setGender(rs.getString("gender"));
+        student.setDob(rs.getDate("dob"));
+        student.setAddress(rs.getString("address"));
+        student.setCourse(rs.getString("course"));
+        student.setAdmissionDate(rs.getDate("admission_date"));
+
+        return student;
     }
 }

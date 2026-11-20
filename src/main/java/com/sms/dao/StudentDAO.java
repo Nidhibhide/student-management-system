@@ -5,18 +5,21 @@ import com.sms.model.Student;
 import java.sql.SQLException;
 import java.util.List;
 
+// DAO interface defines the database operations for Student.
 public interface StudentDAO {
 
-    // Adds a new student record
+    // Add a new student
     boolean addStudent(Student student) throws SQLException;
 
-    // Retrieves all student records
+    // Retrieve all students
     List<Student> getAllStudents() throws SQLException;
 
-    // Searches for a student using ID
-    // Returns null if the student does not exist
+    // Search for a student using ID
     Student searchStudentById(int id) throws SQLException;
 
-    // Updates the details of an existing student
+    // Update an existing student
     boolean updateStudent(Student student) throws SQLException;
+
+    // Delete a student using ID
+    boolean deleteStudent(int id) throws SQLException;
 }
