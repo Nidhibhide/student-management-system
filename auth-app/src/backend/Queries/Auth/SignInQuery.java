@@ -1,36 +1,82 @@
+// package backend.Queries.Auth;
+
+// import java.sql.Connection;
+// import java.sql.PreparedStatement;
+// import java.sql.ResultSet;
+
+
+// import db.DbConnect;
+
+// public class SignInQuery {
+
+//     public boolean signIn(String email, String password) {
+
+//         String query = "SELECT * FROM users WHERE email=? AND password=?";
+
+//         try {
+//             Connection con = DbConnect.gConnection();
+
+//             PreparedStatement ps = con.prepareStatement(query);
+
+//             ps.setString(1, email);
+//             ps.setString(2, password);
+
+//             ResultSet rs = ps.executeQuery();
+
+//             if (rs.next()) {
+//                 con.close();
+//                 return true;
+//             }
+//             con.close();
+//         } catch (Exception e) {
+//             e.printStackTrace();
+//         }
+//         return false;
+//     }
+// }
+
+
+
+
+
 package backend.Queries.Auth;
+
+import db.DbConnect;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-
-import db.DbConnect;
-
+// Checks admin login credentials.
 public class SignInQuery {
 
     public boolean signIn(String email, String password) {
 
-        String query = "SELECT * FROM users WHERE email=? AND password=?";
+        String sql = "SELECT password FROM users WHERE email = ?";
 
-        try {
-            Connection con = DbConnect.gConnection();
+        try (Connection connection = DbConnect.gConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            PreparedStatement ps = con.prepareStatement(query);
+            statement.setString(1, email);
 
-            ps.setString(1, email);
-            ps.setString(2, password);
+            try (ResultSet resultSet = statement.executeQuery()) {
 
-            ResultSet rs = ps.executeQuery();
+                if (resultSet.next()) {
 
-            if (rs.next()) {
-                con.close();
-                return true;
+                    String storedPassword = resultSet.getString("password");
+
+                    // Compare the entered password with the stored BCrypt hash.
+                    return BCrypt.checkpw(password, storedPassword);
+                }
             }
-            con.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        } catch (SQLException | IllegalArgumentException e) {
+
+            System.err.println("Login failed: " + e.getMessage());
         }
+
         return false;
     }
 }

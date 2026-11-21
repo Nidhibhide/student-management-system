@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
@@ -17,32 +17,44 @@
     </properties>
 
     <dependencies>
-        <!-- MySQL JDBC driver -->
+
+        <!-- MySQL database connection -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>9.5.0</version>
         </dependency>
+
+        <!-- Secure password hashing -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Java compiler -->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.1</version>
             </plugin>
 
-            <!-- Run the application -->
+            <!-- Start the application with Sign In -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>
                 <configuration>
-                    <mainClass>com.sms.Main</mainClass>
+                    <!-- <mainClass>frontend.SignIn</mainClass> -->
+                    <mainClass>frontend.SignUp</mainClass>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
+
 </project>
