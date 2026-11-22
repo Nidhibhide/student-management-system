@@ -4,7 +4,10 @@ package db;
 import com.sms.util.DBConnection;
 
 import java.sql.Connection;
+
+
 import java.sql.SQLException;
+
 
 // Authentication and Student modules share the same database connection.
 public class DbConnect {

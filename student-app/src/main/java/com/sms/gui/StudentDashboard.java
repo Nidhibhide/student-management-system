@@ -2,6 +2,7 @@ package com.sms.gui;
 
 import com.sms.model.Student;
 import com.sms.service.StudentService;
+import frontend.SignIn;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -9,6 +10,7 @@ import java.awt.*;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
+import frontend.ChangePassword;
 
 // Main Swing window for managing student records.
 public class StudentDashboard extends JFrame {
@@ -22,8 +24,7 @@ public class StudentDashboard extends JFrame {
     private final JTextField lastNameField = new JTextField();
     private final JTextField emailField = new JTextField();
     private final JTextField mobileField = new JTextField();
-    private final JComboBox<String> genderCombo =
-            new JComboBox<>(new String[]{"Select", "Male", "Female", "Other"});
+    private final JComboBox<String> genderCombo = new JComboBox<>(new String[] { "Select", "Male", "Female", "Other" });
     private final JTextField dobField = new JTextField();
     private final JTextArea addressArea = new JTextArea(3, 15);
     private final JTextField courseField = new JTextField();
@@ -34,12 +35,11 @@ public class StudentDashboard extends JFrame {
 
     // Table to display student records
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{
+            new String[] {
                     "ID", "First Name", "Last Name", "Email",
                     "Mobile", "Gender", "DOB", "Address",
                     "Course", "Admission Date"
-            }, 0
-    ) {
+            }, 0) {
         // Prevent users from directly editing table cells.
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -50,6 +50,10 @@ public class StudentDashboard extends JFrame {
     private final JTable studentTable = new JTable(tableModel);
 
     public StudentDashboard() {
+        this(-1);
+    }
+
+    public StudentDashboard(int userId) {
 
         setTitle("Student Management System");
         setSize(1250, 750);
@@ -63,11 +67,43 @@ public class StudentDashboard extends JFrame {
         // Dashboard heading
         JLabel heading = new JLabel(
                 "STUDENT MANAGEMENT SYSTEM",
-                SwingConstants.CENTER
-        );
+                SwingConstants.CENTER);
         heading.setFont(new Font("Arial", Font.BOLD, 24));
 
-        mainPanel.add(heading, BorderLayout.NORTH);
+        // Account dropdown
+        JButton accountButton = new JButton("Account ▼");
+
+        JPopupMenu accountMenu = new JPopupMenu();
+
+        JMenuItem changePasswordItem = new JMenuItem("Change Password");
+        JMenuItem logoutItem = new JMenuItem("Logout");
+
+        accountMenu.add(changePasswordItem);
+        accountMenu.addSeparator();
+        accountMenu.add(logoutItem);
+
+        accountButton.addActionListener(e -> accountMenu.show(accountButton, 0, accountButton.getHeight()));
+
+        logoutItem.addActionListener(e -> {
+            new SignIn();
+            dispose();
+        });
+        changePasswordItem.addActionListener(e -> {
+            if (userId == -1) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "User information not available.");
+                return;
+            }
+
+            new ChangePassword(userId);
+        });
+        // Header panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.add(heading, BorderLayout.CENTER);
+        headerPanel.add(accountButton, BorderLayout.EAST);
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
 
         // Student form
         JPanel formPanel = createFormPanel();
@@ -79,15 +115,13 @@ public class StudentDashboard extends JFrame {
 
         JScrollPane tableScrollPane = new JScrollPane(studentTable);
         tableScrollPane.setBorder(
-                BorderFactory.createTitledBorder("Student Records")
-        );
+                BorderFactory.createTitledBorder("Student Records"));
 
         // Divide the form and table into two sections.
         JSplitPane splitPane = new JSplitPane(
                 JSplitPane.HORIZONTAL_SPLIT,
                 formPanel,
-                tableScrollPane
-        );
+                tableScrollPane);
 
         splitPane.setDividerLocation(400);
         splitPane.setResizeWeight(0.35);
@@ -118,8 +152,7 @@ public class StudentDashboard extends JFrame {
 
         JPanel panel = new JPanel(new GridLayout(0, 2, 8, 8));
         panel.setBorder(
-                BorderFactory.createTitledBorder("Student Details")
-        );
+                BorderFactory.createTitledBorder("Student Details"));
 
         // Student ID is generated automatically by MySQL.
         idField.setEditable(false);
@@ -203,8 +236,7 @@ public class StudentDashboard extends JFrame {
         student.setAddress(addressArea.getText().trim());
         student.setCourse(courseField.getText().trim());
         student.setAdmissionDate(
-                parseDate(admissionDateField.getText(), "Admission Date")
-        );
+                parseDate(admissionDateField.getText(), "Admission Date"));
 
         return student;
     }
@@ -221,8 +253,7 @@ public class StudentDashboard extends JFrame {
             return Date.valueOf(value.trim());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    fieldName + " must use yyyy-mm-dd format."
-            );
+                    fieldName + " must use yyyy-mm-dd format.");
         }
     }
 
@@ -236,15 +267,13 @@ public class StudentDashboard extends JFrame {
 
             if (result) {
                 JOptionPane.showMessageDialog(
-                        this, "Student added successfully!"
-                );
+                        this, "Student added successfully!");
 
                 clearForm();
                 refreshTable();
             } else {
                 JOptionPane.showMessageDialog(
-                        this, "Unable to add student."
-                );
+                        this, "Unable to add student.");
             }
 
         } catch (IllegalArgumentException e) {
@@ -270,8 +299,7 @@ public class StudentDashboard extends JFrame {
 
             if (result) {
                 JOptionPane.showMessageDialog(
-                        this, "Student updated successfully!"
-                );
+                        this, "Student updated successfully!");
 
                 clearForm();
                 refreshTable();
@@ -301,8 +329,7 @@ public class StudentDashboard extends JFrame {
                     this,
                     "Are you sure you want to delete student ID " + id + "?",
                     "Confirm Delete",
-                    JOptionPane.YES_NO_OPTION
-            );
+                    JOptionPane.YES_NO_OPTION);
 
             if (choice != JOptionPane.YES_OPTION) {
                 return;
@@ -312,8 +339,7 @@ public class StudentDashboard extends JFrame {
 
             if (result) {
                 JOptionPane.showMessageDialog(
-                        this, "Student deleted successfully!"
-                );
+                        this, "Student deleted successfully!");
 
                 clearForm();
                 refreshTable();
@@ -353,12 +379,10 @@ public class StudentDashboard extends JFrame {
             // Select the matching row in the table, if present.
             for (int row = 0; row < tableModel.getRowCount(); row++) {
                 if (Integer.parseInt(
-                        tableModel.getValueAt(row, 0).toString()
-                ) == id) {
+                        tableModel.getValueAt(row, 0).toString()) == id) {
                     studentTable.setRowSelectionInterval(row, row);
                     studentTable.scrollRectToVisible(
-                            studentTable.getCellRect(row, 0, true)
-                    );
+                            studentTable.getCellRect(row, 0, true));
                     break;
                 }
             }
@@ -383,7 +407,7 @@ public class StudentDashboard extends JFrame {
 
             for (Student student : students) {
 
-                tableModel.addRow(new Object[]{
+                tableModel.addRow(new Object[] {
                         student.getId(),
                         student.getFirstName(),
                         student.getLastName(),
@@ -457,8 +481,7 @@ public class StudentDashboard extends JFrame {
         }
 
         dobField.setText(
-                student.getDob() == null ? "" : student.getDob().toString()
-        );
+                student.getDob() == null ? "" : student.getDob().toString());
 
         addressArea.setText(student.getAddress());
         courseField.setText(student.getCourse());
@@ -466,8 +489,7 @@ public class StudentDashboard extends JFrame {
         admissionDateField.setText(
                 student.getAdmissionDate() == null
                         ? ""
-                        : student.getAdmissionDate().toString()
-        );
+                        : student.getAdmissionDate().toString());
     }
 
     // Clear all form fields.
@@ -494,8 +516,7 @@ public class StudentDashboard extends JFrame {
                 this,
                 message,
                 "Error",
-                JOptionPane.ERROR_MESSAGE
-        );
+                JOptionPane.ERROR_MESSAGE);
     }
 
     // Start the GUI on Swing's Event Dispatch Thread.

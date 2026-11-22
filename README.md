@@ -1,10 +1,8 @@
 # student-management-system
 
-This repo contains two separate apps.
+Maven Swing app for admin auth and student management.
 
-## student-app (Person A — Student Management)
-
-Maven project for add / view / search students.
+## Run
 
 ```bash
 cd student-app
@@ -17,11 +15,4 @@ Set the DB password before running:
 $env:SMS_DB_PASSWORD = "your-mysql-password"
 ```
 
-## auth-app (Person B — Authentication)
-
-Swing Sign Up / Sign In UI.
-
-1. Copy `auth-app/.env.example` to `auth-app/.env` and fill in your DB values.
-2. Run `SignUp` or `SignIn` from `auth-app/src/frontend` with jars in `auth-app/lib` on the classpath.
-
-Keep the two apps separate until you intentionally integrate them.
+Main class defaults to `frontend.SignUp` (see `student-app/pom.xml`).

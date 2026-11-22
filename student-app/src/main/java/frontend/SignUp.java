@@ -1,102 +1,204 @@
 package frontend;
 
-import javax.swing.*;
-import backend.Queries.Auth.*;
+import backend.Queries.Auth.SignUpQuery;
 
+import javax.swing.*;
+import java.awt.*;
+
+// Registration window for new admin accounts.
 public class SignUp extends JFrame {
 
-  SignUp() {
-    setTitle("Admin SignUp");
-    setSize(450, 400);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setLocationRelativeTo(null);
+    private JTextField fullnameField;
+    private JTextField emailField;
+    private JPasswordField passwordField;
+    private JPasswordField confirmPasswordField;
 
-    // create panel
-    JPanel panel1 = new JPanel();
-    panel1.setLayout(null);
-    add(panel1);
+    public SignUp() {
 
-    JLabel title = new JLabel("Admin Sign Up");
-    title.setBounds(140, 25, 200, 30);
-    panel1.add(title);
+        setTitle("Admin Registration");
+        setSize(900, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-    JLabel nameLabel = new JLabel("Full Name : ");
-    nameLabel.setBounds(50, 90, 100, 30);
-    panel1.add(nameLabel);
+        // Full-page background; form stays a centered fixed column.
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBorder(
+                BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
-    JTextField nameField = new JTextField();
-    nameField.setBounds(160, 90, 200, 30);
-    panel1.add(nameField);
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        // Width fixed; height grows with content so buttons never overlap.
+        contentPanel.setMaximumSize(new Dimension(560, Integer.MAX_VALUE));
 
-    JLabel emailLabel = new JLabel("Email : ");
-    emailLabel.setBounds(50, 140, 100, 30);
-    panel1.add(emailLabel);
+        JLabel title = new JLabel(
+                "Admin Sign Up",
+                SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 28));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-    JTextField emailField = new JTextField();
-    emailField.setBounds(160, 140, 200, 30);
-    panel1.add(emailField);
+        // Fixed-width form — labels next to fields, no stretch.
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        GridBagConstraints labelConstraints = new GridBagConstraints();
+        GridBagConstraints fieldConstraints = new GridBagConstraints();
 
-    // Password
-    JLabel passwordLabel = new JLabel("Password : ");
-    passwordLabel.setBounds(50, 190, 100, 30);
-    panel1.add(passwordLabel);
+        labelConstraints.gridx = 0;
+        labelConstraints.anchor = GridBagConstraints.EAST;
+        labelConstraints.insets = new Insets(10, 0, 10, 12);
 
-    JPasswordField passwordField = new JPasswordField();
-    passwordField.setBounds(160, 190, 200, 30);
-    panel1.add(passwordField);
+        fieldConstraints.gridx = 1;
+        fieldConstraints.fill = GridBagConstraints.HORIZONTAL;
+        fieldConstraints.weightx = 1;
+        fieldConstraints.insets = new Insets(10, 0, 10, 0);
 
-    // Confirm Password
-    JLabel confirmPasswordLabel = new JLabel("Confirm Password : ");
-    confirmPasswordLabel.setBounds(50, 240, 120, 30);
-    panel1.add(confirmPasswordLabel);
+        fullnameField = new JTextField(32);
+        emailField = new JTextField(32);
+        passwordField = new JPasswordField(32);
+        confirmPasswordField = new JPasswordField(32);
 
-    JPasswordField confirmPasswordField = new JPasswordField();
-    confirmPasswordField.setBounds(160, 240, 200, 30);
-    panel1.add(confirmPasswordField);
+        Dimension fieldSize = new Dimension(380, 42);
+        fullnameField.setPreferredSize(fieldSize);
+        fullnameField.setMinimumSize(fieldSize);
+        emailField.setPreferredSize(fieldSize);
+        emailField.setMinimumSize(fieldSize);
+        passwordField.setPreferredSize(fieldSize);
+        passwordField.setMinimumSize(fieldSize);
+        confirmPasswordField.setPreferredSize(fieldSize);
+        confirmPasswordField.setMinimumSize(fieldSize);
 
-    // Sign Up button
-    JButton button = new JButton("Sign Up");
-    button.setBounds(160, 300, 120, 35);
-    panel1.add(button);
+        Font fieldFont = new Font("Arial", Font.PLAIN, 14);
+        fullnameField.setFont(fieldFont);
+        emailField.setFont(fieldFont);
+        passwordField.setFont(fieldFont);
+        confirmPasswordField.setFont(fieldFont);
 
-    button.addActionListener(e -> {
+        labelConstraints.gridy = 0;
+        fieldConstraints.gridy = 0;
+        formPanel.add(new JLabel("Full Name:"), labelConstraints);
+        formPanel.add(fullnameField, fieldConstraints);
 
-      String name = nameField.getText();
-      String email = emailField.getText();
-      String password = new String(passwordField.getPassword());
-      String confirmpassword = new String(confirmPasswordField.getPassword());
+        labelConstraints.gridy = 1;
+        fieldConstraints.gridy = 1;
+        formPanel.add(new JLabel("Email:"), labelConstraints);
+        formPanel.add(emailField, fieldConstraints);
 
-      if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmpassword.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Please fill all fields");
-        return;
-      }
+        labelConstraints.gridy = 2;
+        fieldConstraints.gridy = 2;
+        formPanel.add(new JLabel("Password:"), labelConstraints);
+        formPanel.add(passwordField, fieldConstraints);
 
-      if (!password.equals(confirmpassword)) {
-        JOptionPane.showMessageDialog(this, "Password do not match");
-        return;
-      }
-      SignUpQuery signUpQuery = new SignUpQuery();
+        labelConstraints.gridy = 3;
+        fieldConstraints.gridy = 3;
+        formPanel.add(new JLabel("Confirm Password:"), labelConstraints);
+        formPanel.add(confirmPasswordField, fieldConstraints);
 
-      boolean result = signUpQuery.register(name, email, password);
+        // Primary + navigation actions in one row.
+        JButton signUpButton = new JButton("Sign Up");
+        signUpButton.setPreferredSize(new Dimension(120, 36));
+        signUpButton.setMaximumSize(new Dimension(120, 36));
 
-      if (result) {
-        JOptionPane.showMessageDialog(this, "Registration Successful");
-        nameField.setText("");
-        emailField.setText("");
-        passwordField.setText("");
-        confirmPasswordField.setText("");
-        new SignIn();
-        dispose();
-      } else
-        JOptionPane.showMessageDialog(this, "Registration Failed!");
+        JButton signInButton = new JButton("Already have an account?");
+        signInButton.setPreferredSize(new Dimension(220, 36));
+        signInButton.setMaximumSize(new Dimension(220, 36));
 
-    });
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        buttonPanel.add(signUpButton);
+        buttonPanel.add(Box.createHorizontalStrut(10));
+        buttonPanel.add(signInButton);
 
-    setVisible(true);
+        contentPanel.add(title);
+        contentPanel.add(Box.createVerticalStrut(28));
+        contentPanel.add(formPanel);
+        contentPanel.add(Box.createVerticalStrut(24));
+        contentPanel.add(buttonPanel);
 
-  }
+        mainPanel.add(contentPanel);
+        add(mainPanel);
 
-  public static void main(String[] args) {
-    new SignUp();
-  }
+        // Register button action.
+        signUpButton.addActionListener(e -> registerAdmin());
+
+        // Existing users can open the login page.
+        signInButton.addActionListener(e -> {
+            new SignIn();
+            dispose();
+        });
+
+        setVisible(true);
+    }
+
+    // Register a new admin account.
+    private void registerAdmin() {
+
+        String fullname = fullnameField.getText().trim();
+        String email = emailField.getText().trim();
+
+        String password = new String(passwordField.getPassword());
+        String confirmPassword = new String(confirmPasswordField.getPassword());
+
+        if (fullname.isEmpty() || email.isEmpty()
+                || password.isEmpty() || confirmPassword.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please fill in all fields.");
+            return;
+        }
+
+        if (password.length() < 8
+                || !password.matches(".*[A-Z].*")
+                || !password.matches(".*[a-z].*")
+                || !password.matches(".*[0-9].*")
+                || !password.matches(".*[^a-zA-Z0-9].*")) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Password must contain:\n"
+                            + "At least 8 characters\n"
+                            + "One uppercase letter\n"
+                            + "One lowercase letter\n"
+                            + "One number\n"
+                            + "One special character");
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Passwords do not match.");
+            return;
+        }
+
+        // Save account in MySQL.
+        SignUpQuery query = new SignUpQuery();
+
+        boolean result = query.register(fullname, email, password);
+
+        if (result) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Registration successful! Please sign in.");
+
+            new SignIn();
+            dispose();
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Registration failed. Email may already exist.",
+                    "Registration Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Application entry point.
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(SignUp::new);
+    }
 }
